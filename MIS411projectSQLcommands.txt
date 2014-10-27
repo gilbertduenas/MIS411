@@ -1,0 +1,681 @@
+=============================================================
+CREATE STATEMENTS
+=============================================================
+
+
+CREATE TABLE PATIENT_m
+    (PatientID number NOT NULL,
+    PatientName VARCHAR2(22),
+    PatContactInfo VARCHAR2(22),
+CONSTRAINT PATIENT_PK PRIMARY KEY(PatientID));
+
+
+CREATE TABLE EMPLOYEE_m
+    (EmployeeID number NOT NULL,
+    EmployeeName VARCHAR2(22),
+    EmpContactInfo VARCHAR2(22),
+CONSTRAINT EMPLOYEE_PK PRIMARY KEY(EmployeeID));
+
+
+CREATE TABLE OFFICE_m
+    (OfficeNumber number NOT NULL,
+    Address VARCHAR2(22),
+CONSTRAINT OFFICE_PK PRIMARY KEY(OfficeNumber));
+
+
+CREATE TABLE VENDOR_m
+    (VendorID number NOT NULL,
+    VendorName VARCHAR2(22),
+    VendorContactInfo VARCHAR2(28),
+CONSTRAINT VENDOR_PK PRIMARY KEY(VendorID));
+
+
+CREATE TABLE INSURANCE_m
+    (InsuranceID number NOT NULL,
+    CompanyName VARCHAR2(20),
+    InsuranceContactInfo VARCHAR2(28),
+CONSTRAINT INSURANCE_PK PRIMARY KEY(InsuranceID));
+
+
+CREATE TABLE DENTIST_m
+    (DEmployeeID number NOT NULL,
+    EmployeeID number,
+    Specialization VARCHAR2(22),
+    YearsExperience number,
+CONSTRAINT DENTIST_PK PRIMARY KEY(DEmployeeID), 
+CONSTRAINT DENTIST_FK1 FOREIGN KEY(EmployeeID) REFERENCES EMPLOYEE_m(EmployeeID));
+
+
+CREATE TABLE SERVICE_m
+    (ServiceID number NOT NULL,
+    DEmployeeID number,
+    ServiceDescription VARCHAR2(26),
+    ServiceCharge number,
+CONSTRAINT SERVICE_PK PRIMARY KEY(ServiceID),
+CONSTRAINT SERVICE_FK1 FOREIGN KEY(DEmployeeID) REFERENCES DENTIST_m(DEmployeeID));
+
+
+CREATE TABLE DENTALSTAFF_m
+    (DSEmployeeID number NOT NULL,
+    EmployeeID number,
+    Position VARCHAR2(16),
+CONSTRAINT DENTALSTAFF_PK PRIMARY KEY(DSEmployeeID), 
+CONSTRAINT DENTALSTAFF_FK1 FOREIGN KEY(EmployeeID) REFERENCES EMPLOYEE_m(EmployeeID));
+
+
+CREATE TABLE ADMINISTRATIVESTAFF_m
+    (ASEmployeeID number NOT NULL,
+    EmployeeID number,
+    Department VARCHAR2(18),
+CONSTRAINT ADMINISTRATIVESTAFF_PK PRIMARY KEY(ASEmployeeID), 
+CONSTRAINT ADMINISTRATIVESTAFF_FK1 FOREIGN KEY(EmployeeID) REFERENCES EMPLOYEE_m(EmployeeID));
+
+
+CREATE TABLE APPOINTMENT_m
+    (AppointmentID number NOT NULL,
+    PatientID number,
+    OfficeNumber number,
+    AppointmentDate VARCHAR2(15),
+    AppointmentTime number,
+CONSTRAINT APPOINTMENT_PK PRIMARY KEY(AppointmentID),
+CONSTRAINT APPOINTMENT_FK1 FOREIGN KEY(PatientID) REFERENCES PATIENT_m(PatientID),
+CONSTRAINT APPOINTMENT_FK2 FOREIGN KEY(OfficeNumber) REFERENCES OFFICE_m(OfficeNumber));
+
+
+CREATE TABLE WORKSIN_m
+    (OfficeNumber number,
+    EmployeeID number, 
+CONSTRAINT WORKSIN_FK1 FOREIGN KEY(OfficeNumber) REFERENCES OFFICE_m(OfficeNumber),
+CONSTRAINT WORKSIN_FK2 FOREIGN KEY(EmployeeID) REFERENCES EMPLOYEE_m(EmployeeID));
+
+    
+CREATE TABLE PATIENTHISTORY_m
+    (PatientID number,
+    ServiceID number, 
+    DateHistory number, 
+    Record number,
+CONSTRAINT PATIENTHISTORY_FK1 FOREIGN KEY(PatientID) REFERENCES PATIENT_m(PatientID),
+CONSTRAINT PATIENTHISTORY_FK2 FOREIGN KEY(ServiceID) REFERENCES SERVICE_m(ServiceID));
+
+
+CREATE TABLE CALENDAR_m
+    (AppointmentID number,
+    DEmployeeID number,
+    DSEmployeeID number,
+CONSTRAINT CALENDAR_FK1 FOREIGN KEY(AppointmentID) REFERENCES APPOINTMENT_m(AppointmentID),
+CONSTRAINT CALENDAR_FK2 FOREIGN KEY(DEmployeeID) REFERENCES DENTIST_m(DEmployeeID),
+CONSTRAINT CALENDAR_FK3 FOREIGN KEY(DSEmployeeID) REFERENCES DENTALSTAFF_m(DSEmployeeID));
+
+
+CREATE TABLE ORDER_m
+    (OrderID	number NOT NULL,
+    VendorID number,
+    ASEmployeeID number, 
+    OrderDate	VARCHAR2(9), 
+    OrderDescription VARCHAR2(25),
+CONSTRAINT ORDER_m_PK PRIMARY KEY(OrderID),
+CONSTRAINT ORDER_m_FK1 FOREIGN KEY(VendorID) REFERENCES VENDOR_m(VendorID),
+CONSTRAINT ORDER_m_FK2 FOREIGN KEY(ASEmployeeID) REFERENCES ADMINISTRATIVESTAFF_m(ASEmployeeID));
+
+
+CREATE TABLE EQUIPMENT_m
+    (EquipmentID	number NOT NULL,
+    OfficeNumber number,
+    OrderID number,
+    Cost number,
+CONSTRAINT EQUIPMENT_m_PK PRIMARY KEY(EquipmentID),
+CONSTRAINT EQUIPMENT_m_FK1 FOREIGN KEY(OfficeNumber) REFERENCES OFFICE_m(OfficeNumber),
+CONSTRAINT EQUIPMENT_m_FK2 FOREIGN KEY(OrderID) REFERENCES ORDER_m(OrderID));
+
+
+CREATE TABLE ROOM_m
+    (RoomNumber number NOT NULL, 
+    OfficeNumber number,
+CONSTRAINT ROOM_m_PK PRIMARY KEY(RoomNumber),
+CONSTRAINT ROOM_m_FK1 FOREIGN KEY(OfficeNumber) REFERENCES OFFICE_m(OfficeNumber));
+
+
+CREATE TABLE COMPUTER_m
+    (ComputerID number NOT NULL,
+    RoomNumber number, 
+    EquipmentID number,
+    ComputerDescription VARCHAR2(27),
+CONSTRAINT COMPUTER_m_PK PRIMARY KEY(ComputerID),
+CONSTRAINT COMPUTER_m_FK1 FOREIGN KEY(RoomNumber) REFERENCES ROOM_m(RoomNumber),
+CONSTRAINT COMPUTER_m_FK2 FOREIGN KEY(EquipmentID) REFERENCES EQUIPMENT_m(EquipmentID));
+
+
+CREATE TABLE BILLDUE_m
+    (InvoiceNumber	number NOT NULL,
+    ASEmployeeID number,
+    VendorID number,
+    InsuranceID number, 
+    BillDescription VARCHAR2(23),
+    BillAmount number,
+CONSTRAINT BILLDUE_m_PK PRIMARY KEY(InvoiceNumber),
+CONSTRAINT BILLDUE_m_FK1 FOREIGN KEY(ASEmployeeID) REFERENCES ADMINISTRATIVESTAFF_m(ASEmployeeID),
+CONSTRAINT BILLDUE_m_FK2 FOREIGN KEY(VendorID) REFERENCES VENDOR_m(VendorID),
+CONSTRAINT BILLDUE_m_FK3 FOREIGN KEY(InsuranceID) REFERENCES INSURANCE_m(InsuranceID));
+
+
+CREATE TABLE PAYMENT_m
+    (InvoiceNumber number,
+    PatientID number,
+    DatePaid	VARCHAR2(9), 
+    PaymentAmount number,
+CONSTRAINT PAYMENT_m_FK1 FOREIGN KEY(InvoiceNumber) REFERENCES BILLDUE_m(InvoiceNumber),
+CONSTRAINT PAYMENT_m_FK2 FOREIGN KEY(PatientID) REFERENCES PATIENT_m(PatientID));
+
+
+=============================================================
+INSERT STATEMENTS
+=============================================================
+
+INSERT INTO PATIENT_m(PatientID, PatientName, PatContactInfo)
+VALUES (201, 'Test PatientName1', 'Test PatContactInfo1');
+
+INSERT INTO PATIENT_m(PatientID, PatientName, PatContactInfo)
+VALUES (202, 'Test PatientName2', 'Test PatContactInfo2');
+
+INSERT INTO PATIENT_m(PatientID, PatientName, PatContactInfo)
+VALUES (203, 'Test PatientName3', 'Test PatContactInfo3');
+
+INSERT INTO PATIENT_m(PatientID, PatientName, PatContactInfo)
+VALUES (204, 'Test PatientName4', 'Test PatContactInfo4');
+
+INSERT INTO PATIENT_m(PatientID, PatientName, PatContactInfo)
+VALUES (205, 'Test PatientName5', 'Test PatContactInfo5');
+
+INSERT INTO PATIENT_m(PatientID, PatientName, PatContactInfo)
+VALUES (206, 'Test PatientName6', 'Test PatContactInfo6');
+
+INSERT INTO PATIENT_m(PatientID, PatientName, PatContactInfo)
+VALUES (207, 'Test PatientName7', 'Test PatContactInfo7');
+
+INSERT INTO PATIENT_m(PatientID, PatientName, PatContactInfo)
+VALUES (208, 'Test PatientName8', 'Test PatContactInfo8');
+
+INSERT INTO PATIENT_m(PatientID, PatientName, PatContactInfo)
+VALUES (209, 'Test PatientName9', 'Test PatContactInfo9');
+
+INSERT INTO PATIENT_m(PatientID, PatientName, PatContactInfo)
+VALUES (210, 'Test PatientName10', 'Test PatContactInfo10');
+
+INSERT INTO PATIENT_m(PatientID, PatientName, PatContactInfo)
+VALUES (211, 'Test PatientName11', 'Test PatContactInfo11');
+
+INSERT INTO PATIENT_m(PatientID, PatientName, PatContactInfo)
+VALUES (212, 'Test PatientName12', 'Test PatContactInfo12');
+
+INSERT INTO PATIENT_m(PatientID, PatientName, PatContactInfo)
+VALUES (213, 'Test PatientName13', 'Test PatContactInfo13');
+
+
+=============================================================
+
+INSERT INTO EMPLOYEE_m(EmployeeID, EmployeeName, EmpContactInfo)
+VALUES (301, 'Test EmployeeName', 'Test EmpContactInfo');
+
+INSERT INTO EMPLOYEE_m(EmployeeID, EmployeeName, EmpContactInfo)
+VALUES (302, 'Test EmployeeName2', 'Test EmpContactInfo2');
+
+INSERT INTO EMPLOYEE_m(EmployeeID, EmployeeName, EmpContactInfo)
+VALUES (303, 'Test EmployeeName3', 'Test EmpContactInfo3');
+
+INSERT INTO EMPLOYEE_m(EmployeeID, EmployeeName, EmpContactInfo)
+VALUES (304, 'Test EmployeeName4', 'Test EmpContactInfo4');
+
+INSERT INTO EMPLOYEE_m(EmployeeID, EmployeeName, EmpContactInfo)
+VALUES (305, 'Test EmployeeName5', 'Test EmpContactInfo5');
+
+INSERT INTO EMPLOYEE_m(EmployeeID, EmployeeName, EmpContactInfo)
+VALUES (306, 'Test EmployeeName6', 'Test EmpContactInfo6');
+
+INSERT INTO EMPLOYEE_m(EmployeeID, EmployeeName, EmpContactInfo)
+VALUES (307, 'Test EmployeeName7', 'Test EmpContactInfo7');
+
+INSERT INTO EMPLOYEE_m(EmployeeID, EmployeeName, EmpContactInfo)
+VALUES (308, 'Test EmployeeName8', 'Test EmpContactInfo8');
+
+INSERT INTO EMPLOYEE_m(EmployeeID, EmployeeName, EmpContactInfo)
+VALUES (309, 'Test EmployeeName9', 'Test EmpContactInfo9');
+
+INSERT INTO EMPLOYEE_m(EmployeeID, EmployeeName, EmpContactInfo)
+VALUES (310, 'Test EmployeeName10', 'Test EmpContactInfo10');
+
+INSERT INTO EMPLOYEE_m(EmployeeID, EmployeeName, EmpContactInfo)
+VALUES (311, 'Test EmployeeName11', 'Test EmpContactInfo11');
+
+INSERT INTO EMPLOYEE_m(EmployeeID, EmployeeName, EmpContactInfo)
+VALUES (312, 'Test EmployeeName12', 'Test EmpContactInfo12');
+
+INSERT INTO EMPLOYEE_m(EmployeeID, EmployeeName, EmpContactInfo)
+VALUES (313, 'Test EmployeeName13', 'Test EmpContactInfo13');
+
+INSERT INTO EMPLOYEE_m(EmployeeID, EmployeeName, EmpContactInfo)
+VALUES (314, 'Test EmployeeName14', 'Test EmpContactInfo14');
+
+INSERT INTO EMPLOYEE_m(EmployeeID, EmployeeName, EmpContactInfo)
+VALUES (315, 'Test EmployeeName15', 'Test EmpContactInfo15');
+
+
+=============================================================
+
+INSERT INTO OFFICE_m(OfficeNumber, Address)
+VALUES (401, 'Test OfficeAddress');
+
+INSERT INTO OFFICE_m(OfficeNumber, Address)
+VALUES (402, 'Test OfficeAddress2');
+
+INSERT INTO OFFICE_m(OfficeNumber, Address)
+VALUES (403, 'Test OfficeAddress3');
+
+INSERT INTO OFFICE_m(OfficeNumber, Address)
+VALUES (404, 'Test OfficeAddress4');
+
+INSERT INTO OFFICE_m(OfficeNumber, Address)
+VALUES (405, 'Test OfficeAddress5');
+
+
+=============================================================
+
+INSERT INTO VENDOR_m(VendorID, VendorName, VendorContactInfo)
+VALUES (501, 'Test VendorName', 'Test VendorContactInfo');
+
+INSERT INTO VENDOR_m(VendorID, VendorName, VendorContactInfo)
+VALUES (502, 'Test VendorName2', 'Test VendorContactInfo2');
+
+INSERT INTO VENDOR_m(VendorID, VendorName, VendorContactInfo)
+VALUES (503, 'Test VendorName3', 'Test VendorContactInfo3');
+
+INSERT INTO VENDOR_m(VendorID, VendorName, VendorContactInfo)
+VALUES (504, 'Test VendorName4', 'Test VendorContactInfo4');
+
+INSERT INTO VENDOR_m(VendorID, VendorName, VendorContactInfo)
+VALUES (505, 'Test VendorName5', 'Test VendorContactInfo5');
+
+INSERT INTO VENDOR_m(VendorID, VendorName, VendorContactInfo)
+VALUES (506, 'Test VendorName6', 'Test VendorContactInfo6');
+
+INSERT INTO VENDOR_m(VendorID, VendorName, VendorContactInfo)
+VALUES (507, 'Test VendorName7', 'Test VendorContactInfo7');
+
+
+=============================================================
+
+INSERT INTO INSURANCE_m(InsuranceID, CompanyName, InsuranceContactInfo)
+VALUES (601, 'Test CompanyName', 'Test InsuranceContactInfo');
+
+INSERT INTO INSURANCE_m(InsuranceID, CompanyName, InsuranceContactInfo)
+VALUES (602, 'Test CompanyName2', 'Test InsuranceContactInfo2');
+
+INSERT INTO INSURANCE_m(InsuranceID, CompanyName, InsuranceContactInfo)
+VALUES (603, 'Test CompanyName3', 'Test InsuranceContactInfo3');
+
+INSERT INTO INSURANCE_m(InsuranceID, CompanyName, InsuranceContactInfo)
+VALUES (604, 'Test CompanyName4', 'Test InsuranceContactInfo4');
+
+INSERT INTO INSURANCE_m(InsuranceID, CompanyName, InsuranceContactInfo)
+VALUES (605, 'Test CompanyName5', 'Test InsuranceContactInfo5');
+
+INSERT INTO INSURANCE_m(InsuranceID, CompanyName, InsuranceContactInfo)
+VALUES (606, 'Test CompanyName6', 'Test InsuranceContactInfo6');
+
+INSERT INTO INSURANCE_m(InsuranceID, CompanyName, InsuranceContactInfo)
+VALUES (607, 'Test CompanyName7', 'Test InsuranceContactInfo7');
+
+
+=============================================================
+
+INSERT INTO DENTIST_m(DEmployeeID, EmployeeID, Specialization, YearsExperience)
+VALUES (701, 301, 'Test Specialization1', '1');
+
+INSERT INTO DENTIST_m(DEmployeeID, EmployeeID, Specialization, YearsExperience)
+VALUES (704, 304, 'Test Specialization2', '55');
+
+INSERT INTO DENTIST_m(DEmployeeID, EmployeeID, Specialization, YearsExperience)
+VALUES (705, 305, 'Test Specialization3', '99');
+
+INSERT INTO DENTIST_m(DEmployeeID, EmployeeID, Specialization, YearsExperience)
+VALUES (714, 314, 'Test Specialization4', '11');
+
+INSERT INTO DENTIST_m(DEmployeeID, EmployeeID, Specialization, YearsExperience)
+VALUES (715, 315, 'Test Specialization5', '22');
+
+
+=============================================================
+
+INSERT INTO SERVICE_m(ServiceID, DEmployeeID, ServiceDescription, ServiceCharge)
+VALUES (101, 701, 'Test ServiceDescription', 102);
+
+INSERT INTO SERVICE_m(ServiceID, DEmployeeID, ServiceDescription, ServiceCharge)
+VALUES (102, 704, 'Test ServiceDescription2', 200);
+
+INSERT INTO SERVICE_m(ServiceID, DEmployeeID, ServiceDescription, ServiceCharge)
+VALUES (103, 701, 'Test ServiceDescription3', 300);
+
+INSERT INTO SERVICE_m(ServiceID, DEmployeeID, ServiceDescription, ServiceCharge)
+VALUES (104, 714, 'Test ServiceDescription4', 400);
+
+INSERT INTO SERVICE_m(ServiceID, DEmployeeID, ServiceDescription, ServiceCharge)
+VALUES (105, 714, 'Test ServiceDescription5', 500);
+
+INSERT INTO SERVICE_m(ServiceID, DEmployeeID, ServiceDescription, ServiceCharge)
+VALUES (106, 715, 'Test ServiceDescription5', 600);
+
+INSERT INTO SERVICE_m(ServiceID, DEmployeeID, ServiceDescription, ServiceCharge)
+VALUES (107, 701, 'Test ServiceDescription5', 700);
+
+
+=============================================================
+
+INSERT INTO DENTALSTAFF_m(DSEmployeeID, EmployeeID, Position)
+VALUES (702, 302, 'Test Position');
+
+INSERT INTO DENTALSTAFF_m(DSEmployeeID, EmployeeID, Position)
+VALUES (706, 306, 'Test Position');
+
+INSERT INTO DENTALSTAFF_m(DSEmployeeID, EmployeeID, Position)
+VALUES (707, 307, 'Test Position2');
+
+INSERT INTO DENTALSTAFF_m(DSEmployeeID, EmployeeID, Position)
+VALUES (708, 308, 'Test Position2');
+
+INSERT INTO DENTALSTAFF_m(DSEmployeeID, EmployeeID, Position)
+VALUES (709, 309, 'Test Position3');
+
+
+=============================================================
+
+INSERT INTO ADMINISTRATIVESTAFF_m(ASEmployeeID, EmployeeID, Department)
+VALUES (703, 303, 'Test Department');
+
+INSERT INTO ADMINISTRATIVESTAFF_m(ASEmployeeID, EmployeeID, Department)
+VALUES (710, 310, 'Test Department');
+
+INSERT INTO ADMINISTRATIVESTAFF_m(ASEmployeeID, EmployeeID, Department)
+VALUES (711, 311, 'Test Department2');
+
+INSERT INTO ADMINISTRATIVESTAFF_m(ASEmployeeID, EmployeeID, Department)
+VALUES (712, 312, 'Test Department2');
+
+INSERT INTO ADMINISTRATIVESTAFF_m(ASEmployeeID, EmployeeID, Department)
+VALUES (713, 313, 'Test Department2');
+
+
+=============================================================
+
+INSERT INTO APPOINTMENT_m(AppointmentID, PatientID, OfficeNumber, AppointmentDate, AppointmentTime)
+VALUES (802, 201, 401, '13/01/30', 2359);
+
+INSERT INTO APPOINTMENT_m(AppointmentID, PatientID, OfficeNumber, AppointmentDate, AppointmentTime)
+VALUES (803, 202, 401, '13/03/12', 1801);
+
+INSERT INTO APPOINTMENT_m(AppointmentID, PatientID, OfficeNumber, AppointmentDate, AppointmentTime)
+VALUES (804, 203, 401, '13/07/01', 0623);
+
+INSERT INTO APPOINTMENT_m(AppointmentID, PatientID, OfficeNumber, AppointmentDate, AppointmentTime)
+VALUES (805, 203, 401, '13/02/06', 0923);
+
+INSERT INTO APPOINTMENT_m(AppointmentID, PatientID, OfficeNumber, AppointmentDate, AppointmentTime)
+VALUES (806, 204, 402, '13/11/25', 0723);
+
+INSERT INTO APPOINTMENT_m(AppointmentID, PatientID, OfficeNumber, AppointmentDate, AppointmentTime)
+VALUES (807, 205, 401, '12/01/29', 1123);
+
+INSERT INTO APPOINTMENT_m(AppointmentID, PatientID, OfficeNumber, AppointmentDate, AppointmentTime)
+VALUES (808, 206, 401, '14/06/22', 1223);
+
+INSERT INTO APPOINTMENT_m(AppointmentID, PatientID, OfficeNumber, AppointmentDate, AppointmentTime)
+VALUES (809, 206, 402, '13/05/17', 1523);
+
+INSERT INTO APPOINTMENT_m(AppointmentID, PatientID, OfficeNumber, AppointmentDate, AppointmentTime)
+VALUES (810, 207, 402, '13/05/14', 2023);
+
+INSERT INTO APPOINTMENT_m(AppointmentID, PatientID, OfficeNumber, AppointmentDate, AppointmentTime)
+VALUES (811, 209, 401, '13/07/08', 1531);
+
+INSERT INTO APPOINTMENT_m(AppointmentID, PatientID, OfficeNumber, AppointmentDate, AppointmentTime)
+VALUES (812, 211, 401, '13/02/24', 1234);
+
+INSERT INTO APPOINTMENT_m(AppointmentID, PatientID, OfficeNumber, AppointmentDate, AppointmentTime)
+VALUES (813, 213, 401, '13/04/23', 2321);
+
+INSERT INTO APPOINTMENT_m(AppointmentID, PatientID, OfficeNumber, AppointmentDate, AppointmentTime)
+VALUES (814, 209, 401, '13/10/18', 1321);
+
+
+=============================================================
+
+INSERT INTO WORKSIN_m(OfficeNumber, EmployeeID)
+VALUES (401, 301);
+
+INSERT INTO WORKSIN_m(OfficeNumber, EmployeeID)
+VALUES (402, 302);
+
+INSERT INTO WORKSIN_m(OfficeNumber, EmployeeID)
+VALUES (402, 303);
+
+INSERT INTO WORKSIN_m(OfficeNumber, EmployeeID)
+VALUES (401, 304);
+
+INSERT INTO WORKSIN_m(OfficeNumber, EmployeeID)
+VALUES (401, 305);
+
+INSERT INTO WORKSIN_m(OfficeNumber, EmployeeID)
+VALUES (402, 306);
+
+INSERT INTO WORKSIN_m(OfficeNumber, EmployeeID)
+VALUES (402, 307);
+
+INSERT INTO WORKSIN_m(OfficeNumber, EmployeeID)
+VALUES (401, 308);
+
+INSERT INTO WORKSIN_m(OfficeNumber, EmployeeID)
+VALUES (401, 309);
+
+INSERT INTO WORKSIN_m(OfficeNumber, EmployeeID)
+VALUES (402, 310);
+
+INSERT INTO WORKSIN_m(OfficeNumber, EmployeeID)
+VALUES (402, 311);
+
+INSERT INTO WORKSIN_m(OfficeNumber, EmployeeID)
+VALUES (401, 312);
+
+INSERT INTO WORKSIN_m(OfficeNumber, EmployeeID)
+VALUES (401, 313);
+
+
+=============================================================
+
+INSERT INTO PATIENTHISTORY_m(PatientID, ServiceID, DateHistory, Record)
+VALUES (201, 101, '13/01/30', 0001);
+
+INSERT INTO PATIENTHISTORY_m(PatientID, ServiceID, DateHistory, Record)
+VALUES (201, 101, '13/01/19', 0002);
+
+INSERT INTO PATIENTHISTORY_m(PatientID, ServiceID, DateHistory, Record)
+VALUES (201, 101, '13/01/14', 0003);
+
+INSERT INTO PATIENTHISTORY_m(PatientID, ServiceID, DateHistory, Record)
+VALUES (202, 102, '11/01/16', 0001);
+
+INSERT INTO PATIENTHISTORY_m(PatientID, ServiceID, DateHistory, Record)
+VALUES (203, 102, '13/01/18', 0001);
+
+INSERT INTO PATIENTHISTORY_m(PatientID, ServiceID, DateHistory, Record)
+VALUES (204, 102, '11/01/21', 0001);
+
+INSERT INTO PATIENTHISTORY_m(PatientID, ServiceID, DateHistory, Record)
+VALUES (205, 102, '13/01/22', 0001);
+
+INSERT INTO PATIENTHISTORY_m(PatientID, ServiceID, DateHistory, Record)
+VALUES (206, 103, '12/01/03', 0001);
+
+INSERT INTO PATIENTHISTORY_m(PatientID, ServiceID, DateHistory, Record)
+VALUES (206, 104, '13/01/19', 0002);
+
+INSERT INTO PATIENTHISTORY_m(PatientID, ServiceID, DateHistory, Record)
+VALUES (207, 105, '13/01/09', 0001);
+
+INSERT INTO PATIENTHISTORY_m(PatientID, ServiceID, DateHistory, Record)
+VALUES (207, 106, '12/01/15', 0002);
+
+INSERT INTO PATIENTHISTORY_m(PatientID, ServiceID, DateHistory, Record)
+VALUES (207, 107, '13/01/27', 0003);
+
+
+=============================================================
+
+INSERT INTO CALENDAR_m(AppointmentID, DEmployeeID, DSEmployeeID)
+VALUES (802, 701, 702);
+
+INSERT INTO CALENDAR_m(AppointmentID, DEmployeeID, DSEmployeeID)
+VALUES (803, 701, 702);
+
+INSERT INTO CALENDAR_m(AppointmentID, DEmployeeID, DSEmployeeID)
+VALUES (804, 704, 702);
+
+INSERT INTO CALENDAR_m(AppointmentID, DEmployeeID, DSEmployeeID)
+VALUES (805, 704, 706);
+
+INSERT INTO CALENDAR_m(AppointmentID, DEmployeeID, DSEmployeeID)
+VALUES (806, 701, 707);
+
+INSERT INTO CALENDAR_m(AppointmentID, DEmployeeID, DSEmployeeID)
+VALUES (807, 701, 708);
+
+INSERT INTO CALENDAR_m(AppointmentID, DEmployeeID, DSEmployeeID)
+VALUES (808, 703, 702);
+
+INSERT INTO CALENDAR_m(AppointmentID, DEmployeeID, DSEmployeeID)
+VALUES (809, 701, 702);
+
+
+=============================================================
+
+INSERT INTO ORDER_m(OrderID, VendorID, ASEmployeeID, OrderDate, OrderDescription)
+VALUES (902, 501, 703, '12/02/30', 'Test OrderDescription');
+
+INSERT INTO ORDER_m(OrderID, VendorID, ASEmployeeID, OrderDate, OrderDescription)
+VALUES (903, 501, 711, '12/02/15', 'Test OrderDescription2');
+
+INSERT INTO ORDER_m(OrderID, VendorID, ASEmployeeID, OrderDate, OrderDescription)
+VALUES (904, 502, 711, '12/11/16', 'Test OrderDescription3');
+
+INSERT INTO ORDER_m(OrderID, VendorID, ASEmployeeID, OrderDate, OrderDescription)
+VALUES (905, 502, 703, '10/01/19', 'Test OrderDescription4');
+
+INSERT INTO ORDER_m(OrderID, VendorID, ASEmployeeID, OrderDate, OrderDescription)
+VALUES (906, 504, 713, '11/08/30', 'Test OrderDescription5');
+
+INSERT INTO ORDER_m(OrderID, VendorID, ASEmployeeID, OrderDate, OrderDescription)
+VALUES (907, 507, 713, '12/02/28', 'Test OrderDescription6');
+
+INSERT INTO ORDER_m(OrderID, VendorID, ASEmployeeID, OrderDate, OrderDescription)
+VALUES (908, 507, 703, '08/06/19', 'Test OrderDescription7');
+
+INSERT INTO ORDER_m(OrderID, VendorID, ASEmployeeID, OrderDate, OrderDescription)
+VALUES (909, 507, 703, '13/02/05', 'Test OrderDescription8');
+
+INSERT INTO ORDER_m(OrderID, VendorID, ASEmployeeID, OrderDate, OrderDescription)
+VALUES (910, 507, 703, '12/02/16', 'Test OrderDescription9');
+
+
+=============================================================
+
+INSERT INTO EQUIPMENT_m(EquipmentID, OfficeNumber, OrderID, Cost)
+VALUES (1001, 401, 902, 11111);
+
+INSERT INTO EQUIPMENT_m(EquipmentID, OfficeNumber, OrderID, Cost)
+VALUES (1002, 401, 903, 22222);
+
+INSERT INTO EQUIPMENT_m(EquipmentID, OfficeNumber, OrderID, Cost)
+VALUES (1003, 402, 907, 33333);
+
+INSERT INTO EQUIPMENT_m(EquipmentID, OfficeNumber, OrderID, Cost)
+VALUES (1004, 402, 908, 44444);
+
+INSERT INTO EQUIPMENT_m(EquipmentID, OfficeNumber, OrderID, Cost)
+VALUES (1005, 401, 909, 55555);
+
+
+=============================================================
+
+INSERT INTO ROOM_m(RoomNumber, OfficeNumber)
+VALUES (2001, 402);
+
+INSERT INTO ROOM_m(RoomNumber, OfficeNumber)
+VALUES (1001, 401);
+
+INSERT INTO ROOM_m(RoomNumber, OfficeNumber)
+VALUES (1002, 401);
+
+INSERT INTO ROOM_m(RoomNumber, OfficeNumber)
+VALUES (2002, 402);
+
+INSERT INTO ROOM_m(RoomNumber, OfficeNumber)
+VALUES (1003, 401);
+
+
+=============================================================
+
+INSERT INTO COMPUTER_m(ComputerID, RoomNumber, EquipmentID, ComputerDescription)
+VALUES (3001, 1001, 1001, 'Test ComputerDescription');
+
+INSERT INTO COMPUTER_m(ComputerID, RoomNumber, EquipmentID, ComputerDescription)
+VALUES (3002, 2001, 1002, 'Test ComputerDescription2');
+
+INSERT INTO COMPUTER_m(ComputerID, RoomNumber, EquipmentID, ComputerDescription)
+VALUES (3003, 1002, 1003, 'Test ComputerDescription3');
+
+INSERT INTO COMPUTER_m(ComputerID, RoomNumber, EquipmentID, ComputerDescription)
+VALUES (3004, 2002, 1004, 'Test ComputerDescription4');
+
+INSERT INTO COMPUTER_m(ComputerID, RoomNumber, EquipmentID, ComputerDescription)
+VALUES (3005, 2001, 1005, 'Test ComputerDescription5');
+
+
+=============================================================
+
+INSERT INTO BILLDUE_m(InvoiceNumber, ASEmployeeID, VendorID, InsuranceID,  BillDescription, BillAmount)
+VALUES (4001, 703, 501, 601, 'Test BillDescription1', 100);
+
+INSERT INTO BILLDUE_m(InvoiceNumber, ASEmployeeID, VendorID, InsuranceID,  BillDescription, BillAmount)
+VALUES (4002, NULL, NULL, 601, 'Test BillDescription2', 200);
+
+INSERT INTO BILLDUE_m(InvoiceNumber, ASEmployeeID, VendorID, InsuranceID,  BillDescription, BillAmount)
+VALUES (4003, NULL, 502, NULL, 'Test BillDescription3', 300);
+
+INSERT INTO BILLDUE_m(InvoiceNumber, ASEmployeeID, VendorID, InsuranceID,  BillDescription, BillAmount)
+VALUES (4004, 711, NULL, NULL, 'Test BillDescription4', 400);
+
+INSERT INTO BILLDUE_m(InvoiceNumber, ASEmployeeID, VendorID, InsuranceID,  BillDescription, BillAmount)
+VALUES (4005, 713, NULL, NULL, 'Test BillDescription5', 500);
+
+INSERT INTO BILLDUE_m(InvoiceNumber, ASEmployeeID, VendorID, InsuranceID,  BillDescription, BillAmount)
+VALUES (4006, 712, NULL, 607, 'Test BillDescription6', 600);
+
+
+=============================================================
+
+INSERT INTO PAYMENT_m(InvoiceNumber, PatientID, DatePaid, PaymentAmount)
+VALUES (4001, 201, '08/08/31', 100);
+
+INSERT INTO PAYMENT_m(InvoiceNumber, PatientID, DatePaid, PaymentAmount)
+VALUES (4002, 202, '09/08/31', 150);
+
+INSERT INTO PAYMENT_m(InvoiceNumber, PatientID, DatePaid, PaymentAmount)
+VALUES (4003, 203, '10/08/31', 250);
+
+INSERT INTO PAYMENT_m(InvoiceNumber, PatientID, DatePaid, PaymentAmount)
+VALUES (4004, 204, '11/08/31', 300);
+
+INSERT INTO PAYMENT_m(InvoiceNumber, PatientID, DatePaid, PaymentAmount)
+VALUES (4005, 205, '12/08/31', 325);
+
+INSERT INTO PAYMENT_m(InvoiceNumber, PatientID, DatePaid, PaymentAmount)
+VALUES (4006, 206, '13/08/31', 600);
+
+

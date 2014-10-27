@@ -1,0 +1,302 @@
+Gilbert Duenas
+SQL  queries
+
+=============================================================
+1) This query finds all the tables associated with the project. 
+These tables should all have _M at the end.
+
+select table_name from tabs where table_name like '%_M';
+
+TABLE_NAME
+------------------------------
+ADMINISTRATIVESTAFF_M
+APPOINTMENT_M
+BILLDUE_M
+CALENDAR_M
+COMPUTER_M
+DENTALSTAFF_M
+DENTIST_M
+EMPLOYEE_M
+EQUIPMENT_M
+INSURANCE_M
+OFFICE_M
+
+TABLE_NAME
+------------------------------
+ORDER_M
+PATIENTHISTORY_M
+PATIENT_M
+PAYMENT_M
+ROOM_M
+SERVICE_M
+VENDOR_M
+WORKSIN_M
+
+19 rows selected.
+
+
+=============================================================
+2) How many patients were there during the summer of 2013?
+
+select patientid from appointment_m 
+where appointmentdate > '13/06/20' and appointmentdate < '13/09/22';
+
+ PATIENTID
+----------
+       203
+       209
+
+       
+=============================================================
+3) What are the names of those patients?
+
+select patientname from patient_m where patientid in 
+(select patientid from appointment_m 
+where appointmentdate > '13/06/20' and appointmentdate < '13/09/22');
+
+PATIENTNAME
+--------------------------------------------------
+Test PatientName3
+Test PatientName9
+
+
+=============================================================
+4) For each patient who has made an appointment, what is the patient's name and appointment ID?
+
+-equijoin
+select patient_m.patientid, appointment_m.patientid, patientname, appointmentid
+from patient_m, appointment_m
+where patient_m.patientid = appointment_m.patientid
+order by appointmentid;
+
+-inner join
+select patient_m.patientid, appointment_m.patientid, patientname, appointmentid
+from patient_m INNER JOIN appointment_m ON
+patient_m.patientid = appointment_m.patientid
+order by appointmentid;
+
+ PATIENTID  PATIENTID PATIENTNAME            APPOINTMENTID
+---------- ---------- ---------------------- -------------
+       201        201 Test PatientName1                802
+       202        202 Test PatientName2                803
+       203        203 Test PatientName3                804
+       203        203 Test PatientName3                805
+       204        204 Test PatientName4                806
+       205        205 Test PatientName5                807
+       206        206 Test PatientName6                808
+       206        206 Test PatientName6                809
+       207        207 Test PatientName7                810
+       209        209 Test PatientName9                811
+       211        211 Test PatientName11               812
+
+ PATIENTID  PATIENTID PATIENTNAME            APPOINTMENTID
+---------- ---------- ---------------------- -------------
+       213        213 Test PatientName13               813
+       209        209 Test PatientName9                814
+
+13 rows selected.
+
+
+=============================================================
+5) What is the total cost of equipment from Test OfficeAddress?
+
+select sum(cost) from equipment_m where officenumber in 
+(select officenumber from office_m where address = 'Test OfficeAddress');
+
+ SUM(COST)
+----------
+     88888
+
+
+=============================================================
+6) List the name of each patient and their service ID.
+
+select patientname, serviceid
+from patient_m
+inner join patienthistory_m
+on patient_m.patientid = patienthistory_m.patientid
+order by patientname;
+
+PATIENTNAME             SERVICEID
+---------------------- ----------
+Test PatientName1             101
+Test PatientName1             101
+Test PatientName1             101
+Test PatientName2             102
+Test PatientName3             102
+Test PatientName4             102
+Test PatientName5             102
+Test PatientName6             104
+Test PatientName6             103
+Test PatientName7             106
+Test PatientName7             107
+
+PATIENTNAME             SERVICEID
+---------------------- ----------
+Test PatientName7             105
+
+12 rows selected.
+
+
+=============================================================
+7) List the patientID and each service charge.
+
+select patientid, servicecharge
+from patienthistory_m
+inner join service_m
+on patienthistory_m.serviceid = service_m.serviceid
+order by patientid;
+
+ PATIENTID SERVICECHARGE
+---------- -------------
+       201           102
+       201           102
+       201           102
+       202           200
+       203           200
+       204           200
+       205           200
+       206           300
+       206           400
+       207           500
+       207           600
+
+ PATIENTID SERVICECHARGE
+---------- -------------
+       207           700
+
+12 rows selected.
+
+
+=============================================================
+8) List the name of each patient, and their total service charge.
+
+select patientname, sum(servicecharge)
+from patient_m 
+inner join patienthistory_m
+on patient_m.patientid = patienthistory_m.patientid
+inner join service_m
+on patienthistory_m.serviceid = service_m.serviceid
+group by patientname;
+
+PATIENTNAME            SUM(SERVICECHARGE)
+---------------------- ------------------
+Test PatientName2                     200
+Test PatientName4                     200
+Test PatientName5                     200
+Test PatientName1                     306
+Test PatientName7                    1800
+Test PatientName6                     700
+Test PatientName3                     200
+
+7 rows selected.
+
+
+=============================================================
+9) List the name of each patient, and the dentist who saw that patient.
+
+select distinct patientname, employeename
+from patient_m 
+inner join patienthistory_m
+on patient_m.patientid = patienthistory_m.patientid
+inner join service_m
+on patienthistory_m.serviceid = service_m.serviceid
+inner join dentist_m
+on service_m.demployeeid = dentist_m.demployeeid
+inner join employee_m
+on dentist_m.employeeid = employee_m.employeeid
+order by patientname;
+
+PATIENTNAME            EMPLOYEENAME
+---------------------- ----------------------
+Test PatientName1      Test EmployeeName
+Test PatientName2      Test EmployeeName4
+Test PatientName3      Test EmployeeName4
+Test PatientName4      Test EmployeeName4
+Test PatientName5      Test EmployeeName4
+Test PatientName6      Test EmployeeName
+Test PatientName6      Test EmployeeName14
+Test PatientName7      Test EmployeeName
+Test PatientName7      Test EmployeeName14
+Test PatientName7      Test EmployeeName15
+
+10 rows selected.
+
+
+=============================================================
+10) Create an invoice for invoice number 4005.
+
+select patient_m.patientid, patientname, patcontactinfo, payment_m.invoicenumber, billdescription, billamount
+from patient_m, payment_m, billdue_m
+where patient_m.patientid = payment_m.patientid
+and payment_m.invoicenumber = billdue_m.invoicenumber
+and billdue_m.invoicenumber = 4005;
+
+ PATIENTID PATIENTNAME            PATCONTACTINFO         INVOICENUMBER
+---------- ---------------------- ---------------------- -------------
+BILLDESCRIPTION         BILLAMOUNT
+----------------------- ----------
+       205 Test PatientName5      Test PatContactInfo5            4005
+Test BillDescription5          500
+
+
+=============================================================
+11) What is the least and the most a patient has paid?
+
+select patientname, paymentamount
+from patient_m, payment_m
+where patient_m.patientid = payment_m.patientid
+and paymentamount = (select min(paymentamount) from payment_m)
+union
+select patientname, paymentamount
+from patient_m, payment_m
+where patient_m.patientid = payment_m.patientid
+and paymentamount = (select max(paymentamount) from payment_m);
+
+
+=============================================================
+12) What dates does each dentist have an appointment scheduled?
+
+select dentist_m.demployeeid, appointmentdate
+from dentist_m inner join calendar_m
+on dentist_m.demployeeid = calendar_m.demployeeid
+inner join appointment_m
+on calendar_m.appointmentid = appointment_m.appointmentid
+order by dentist_m.demployeeid;
+
+DEMPLOYEEID APPOINTMENTDATE
+----------- ---------------
+        701 12/01/29
+        701 13/03/12
+        701 13/01/30
+        701 13/05/17
+        701 13/11/25
+        704 13/07/01
+        704 13/02/06
+
+7 rows selected.
+
+
+=============================================================
+13) What is the total cost of computers for Test OfficeAddress2?
+
+-equijoin
+select address, sum(cost) 
+from computer_m, equipment_m, office_m 
+where  computer_m.equipmentid = equipment_m.equipmentid
+and equipment_m.officenumber = office_m.officenumber
+and address = 'Test OfficeAddress2'
+group by address;
+
+-inner
+select address, sum(cost) 
+from computer_m inner join equipment_m 
+on  computer_m.equipmentid = equipment_m.equipmentid
+inner join office_m
+on equipment_m.officenumber = office_m.officenumber
+where address = 'Test OfficeAddress2'
+group by address;
+
+ADDRESS                 SUM(COST)
+---------------------- ----------
+Test OfficeAddress2         77777

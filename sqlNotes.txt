@@ -1,0 +1,72 @@
+alter table patient_m modify patientname varchar2(22);
+alter table patient_m modify PatContactInfo varchar2(22);
+
+alter table EMPLOYEE_m modify employeename varchar2(22);
+alter table EMPLOYEE_m modify empcontactinfo varchar2(22);
+
+alter table OFFICE_m modify Address varchar2(22);
+
+alter table VENDOR_m modify VendorName varchar2(22);
+alter table VENDOR_m modify VendorContactInfo varchar2(28);
+
+alter table INSURANCE_m modify CompanyName varchar2(20);
+alter table INSURANCE_m modify InsuranceContactInfo varchar2(28);
+
+alter table DENTIST_m modify Specialization varchar2(22);
+
+alter table SERVICE_m modify ServiceDescription varchar2(26);
+
+alter table DENTALSTAFF_m modify Position varchar2(16);
+
+alter table ADMINISTRATIVESTAFF_m modify Department varchar2(18);
+
+alter table APPOINTMENT_m modify AppointmentDate VARCHAR2(15);
+
+alter table ORDER_m modify OrderDate	VARCHAR2(9);
+alter table ORDER_m modify OrderDescription VARCHAR2(25);
+
+alter table COMPUTER_m modify ComputerDescription VARCHAR2(27);
+
+alter table BILLDUE_m modify BillDescription VARCHAR2(23);
+
+alter table PAYMENT_m modify DatePaid	VARCHAR2(9);
+
+ADD 8
+
+select patientname from patient_m where patientid in (select patientid from patienthistory_m where patient_m.patientid = patienthistory_m.patientid)
+
+(select serviceid, sum(servicecharge) from service_m 
+where serviceid in 
+(select serviceid from patienthistory_m 
+where patienthistory_m.serviceid = service_m.serviceid) 
+group by serviceid);
+
+
+select patientname, sum(servicecharge)
+from patient_m inner join patienthistory_m
+on patient_m.patientid = patienthistory_m.patientid
+inner join service_m
+on patienthistory_m.serviceid = service_m.serviceid
+group by patientname;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
